@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MyPaychequeApp</title>
+
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="MyPaychequeApp">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <style>
+        html { height: 100%; box-sizing: border-box; }
+        *, *:before, *:after { box-sizing: inherit; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0; padding: 20px;
+            background-color: #121212; color: #ffffff;
+            min-height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        }
+        .container {
+            max-width: 600px; margin: 0 auto; text-align: center; 
+            background-color: #1e1e1e; padding: 20px; border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); width: 100%; 
+        }
+        h1 { margin-bottom: 5px; }
+        .model-tag { font-size: 0.7em; color: #666; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        label { display: block; color: #b0b0b0; margin-bottom: 5px; font-size: 0.9em; }
+        input {
+            padding: 12px; border-radius: 8px; border: 1px solid #444;
+            background-color: #333; color: white; font-size: 16px; width: 100%; text-align: center;
+        }
+        .hours-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .hours-container > div { flex: 1; min-width: 120px; }
+        button {
+            border: none; color: white; padding: 15px; font-size: 16px; font-weight: bold; 
+            cursor: pointer; border-radius: 8px; margin-top: 10px; width: 100%;
+        }
+        .btn-add { background-color: #4CAF50; }
+        .btn-copy { background-color: #2196F3; }
+        .btn-save { background-color: #FF9800; }
+        .btn-load { background-color: #9C27B0; }
+        .btn-clear { background-color: #d32f2f; margin-top: 20px; }
+        .totals-container {
+            margin-top: 30px; border-top: 1px solid #444; padding-top: 20px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+        }
+        .full-width { grid-column: span 2; }
+        #dailyEntries { margin-top: 30px; border-top: 1px solid #444; text-align: left; }
+        .daily-entry {
+            background-color: #2c2c2c; padding: 12px; margin-bottom: 10px;
+            border-radius: 8px; display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid #4CAF50;
+        }
+        #overallTotals { margin-top: 30px; background-color: #252525; padding: 20px; border-radius: 12px; }
+        #overallTotals p { display: flex; justify-content: space-between; border-bottom: 1px solid #333; }
+        #overallTotals span { color: #4CAF50; font-weight: bold; }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>MyPaychequeApp</h1>
+        <div class="model-tag">Model: Gemini 3 Flash</div>
+
+        <label for="date">Select Date</label>
+        <input type="text" id="date" readonly class="flatpickr">
+
+        <br>
+
+        <div class="hours-container">
+            <div><label>Reg Hrs</label><input type="number" id="regularHours" inputmode="decimal"></div>
+            <div><label>OT Hrs</label><input type="number" id="overtimeHours" inputmode="decimal"></div>
+            <div style="width:100%"><label>Holiday Note</label><input type="text" id="holidayNote"></div>
+        </div>
+
+        <button class="btn-add" onclick="addHours()">Add Hours</button>
+
+        <div class="totals-container">
+            <div><label>Rate ($)</label><input type="number" id="hourlyRate" step="0.01" oninput="saveRates()"></div>
+            <div><label>OT Multi</label><input type="number" id="otRate" step="0.1" oninput="saveRates()"></div>
+            <div class="full-width"><label>Tax (%)</label><input type="number" id="taxRate" oninput="saveRates()"></div>
+            <div><label>Total Reg</label><input type="number" id="totalRegularHours" readonly></div>
+            <div><label>Total OT</label><input type="number" id="totalOvertimeHours" readonly></div>
+            <div class="full-width"><label>Net Pay</label><input type="number" id="netPay" readonly style="color:#4CAF50; font-weight:bold;"></div>
+        </div>
+
+        <div id="dailyEntries"><h2>Daily Entries</h2></div>
+
+        <div id="overallTotals">
+            <h2>Total Summary</h2>
+            <p>Net Pay: <span id="overallNetPay">$0.00</span></p>
+        </div>
+
+        <button class="btn-copy" onclick="copyDailyHours()">Copy Daily Hours</button>
+
+        <div style="margin-top:20px; padding:20px; border:1px dashed #555;">
+            <button class="btn-save" onclick="exportData()">⬇️ Save to File</button>
+            <button class="btn-load" onclick="document.getElementById('importFile').click()">⬆️ Load from File</button>
+            <input type="file" id="importFile" style="display:none" onchange="importData(this)">
+            <button class="btn-clear" onclick="clearData()">⚠️ Clear All Entries</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        let dailyHours = {}; 
+        window.onload = function () {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then(() => console.log("Service Worker Registered"));
+            }
+            flatpickr("#date", { dateFormat: "Y-m-d", defaultDate: "today" });
+            dailyHours = JSON.parse(localStorage.getItem('dailyHours') || '{}');
+            loadSavedRates();
+            updateTotals();
+            displayDailyEntries();
+        };
+
+        function addHours() {
+            const date = document.getElementById("date").value;
+            const reg = parseFloat(document.getElementById("regularHours").value) || 0;
+            const ot = parseFloat(document.getElementById("overtimeHours").value) || 0;
+            const note = document.getElementById("holidayNote").value;
+            if (reg === 0 && ot === 0) return;
+            dailyHours[date] = { regular: reg, overtime: ot, note: note };
+            localStorage.setItem('dailyHours', JSON.stringify(dailyHours));
+            updateTotals();
+            displayDailyEntries();
+        }
+
+        function updateTotals() {
+            let tr = 0, tot = 0;
+            for (let d in dailyHours) { tr += dailyHours[d].regular; tot += dailyHours[d].overtime; }
+            document.getElementById("totalRegularHours").value = tr.toFixed(2);
+            document.getElementById("totalOvertimeHours").value = tot.toFixed(2);
+            
+            const rate = parseFloat(document.getElementById("hourlyRate").value) || 0;
+            const tax = parseFloat(document.getElementById("taxRate").value) || 0;
+            const multi = parseFloat(document.getElementById("otRate").value) || 1.5;
+            const gross = (tr * rate) + (tot * rate * multi);
+            const net = gross - (gross * (tax / 100));
+            document.getElementById("netPay").value = net.toFixed(2);
+            document.getElementById("overallNetPay").textContent = "$" + net.toFixed(2);
+        }
+
+        function saveRates() {
+            localStorage.setItem('hourlyRate', document.getElementById("hourlyRate").value);
+            localStorage.setItem('taxRate', document.getElementById("taxRate").value);
+            localStorage.setItem('otRate', document.getElementById("otRate").value);
+            updateTotals();
+        }
+
+        function loadSavedRates() {
+            document.getElementById("hourlyRate").value = localStorage.getItem('hourlyRate') || "";
+            document.getElementById("taxRate").value = localStorage.getItem('taxRate') || "0";
+            document.getElementById("otRate").value = localStorage.getItem('otRate') || "1.5";
+        }
+
+        function displayDailyEntries() {
+            const container = document.getElementById("dailyEntries");
+            container.innerHTML = "<h2>Daily Entries</h2>";
+            Object.keys(dailyHours).sort().reverse().forEach(date => {
+                const div = document.createElement("div");
+                div.className = "daily-entry";
+                div.innerHTML = `<span><b>${date}</b>: ${(dailyHours[date].regular + dailyHours[date].overtime).toFixed(2)} hrs</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function clearData() {
+            if(confirm("Clear entries? Rates and API keys will stay.")){
+                dailyHours = {}; localStorage.setItem('dailyHours', '{}');
+                updateTotals(); displayDailyEntries();
+            }
+        }
+
+        function exportData() {
+            const data = { dailyHours, rates: { hr: localStorage.getItem('hourlyRate'), tx: localStorage.getItem('taxRate'), ot: localStorage.getItem('otRate') }};
+            const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = "MyPaychequeApp_Backup.json";
+            a.click();
+        }
+
+        function importData(input) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const data = JSON.parse(e.target.result);
+                dailyHours = data.dailyHours;
+                localStorage.setItem('dailyHours', JSON.stringify(dailyHours));
+                localStorage.setItem('hourlyRate', data.rates.hr);
+                localStorage.setItem('taxRate', data.rates.tx);
+                localStorage.setItem('otRate', data.rates.ot);
+                location.reload();
+            };
+            reader.readAsText(input.files[0]);
+        }
+
+        function copyDailyHours() {
+            let txt = "";
+            for(let d in dailyHours) { if(!dailyHours[d].note) txt += `${d} Hours-${(dailyHours[d].regular + dailyHours[d].overtime).toFixed(2)}\n`; }
+            navigator.clipboard.writeText(txt).then(() => alert("Copied!"));
+        }
+    </script>
+</body>
+</html>
