@@ -1,6 +1,7 @@
 {
   "name": "MyPaychequeApp",
-  "short_name": "MyPaycheque",
+  "short_name": "MyPaychequeApp",
+  "description": "Track your work hours, overtime, and estimated net pay.",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#121212",
@@ -15,6 +16,15 @@
       "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "MyPaychequeApp Main Screen"
     }
   ]
 }
