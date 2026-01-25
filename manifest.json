@@ -1,0 +1,29 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "MyPaychequeApp",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "MyPaychequeApp",
+  "start_url": "index.html",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "https://gamache61.github.io/MyPaychequeApp/icon.png",
+      "type": "image/png",
+      "isSquare": false,
+      "isPng": true,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ]
+}
