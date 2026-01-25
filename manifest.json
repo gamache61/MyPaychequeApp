@@ -11,7 +11,7 @@
   "icons": [
     {
       "FIXED": "Changed src to icon.png to fix the 404 error and added the mandatory sizes field",
-      "src": "icon.png",
+      "src": "icon512.png",
       "type": "image/png",
       "sizes": "512x512",
       "isSquare": false,
@@ -24,7 +24,7 @@
       "is192x192": false
     },
     {
-      "src": "icon.png",
+      "src": "icon192.png",
       "type": "image/png",
       "sizes": "192x192"
     }
@@ -33,4 +33,5 @@
     "standalone",
     "window-controls-overlay"
   ]
+
 }
